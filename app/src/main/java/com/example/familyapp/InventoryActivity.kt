@@ -1,4 +1,5 @@
 // com.example.familyapp/InventoryActivity.kt
+// com.example.familyapp/InventoryActivity.kt
 
 package com.example.familyapp
 
@@ -10,15 +11,10 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-
-// 修复 1: 确保 Adapter 导入路径正确 (根据您的文件结构)
-import com.example.familyapp.data.InventoryAdapter
-
+import com.example.familyapp.adapter.InventoryAdapter
 import com.example.familyapp.data.Family
-// 修复 2: 导入正确的数据模型 (替换旧的 InventoryItem)
 import com.example.familyapp.data.InventoryItemFirestore
 import com.example.familyapp.databinding.ActivityInventoryBinding
-
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
@@ -59,7 +55,12 @@ class InventoryActivity : AppCompatActivity() {
         }
 
         // 修复 3: 初始化 Adapter 时，必须明确指定列表类型
-        inventoryAdapter = InventoryAdapter(this, mutableListOf<InventoryListItem>())
+        inventoryAdapter = InventoryAdapter(
+            this,
+            mutableListOf<InventoryListItem>(),
+            onQuantityAdd = { item -> adjustItemQuantity(item, 1) },      // 数量 +1
+            onQuantitySubtract = { item -> adjustItemQuantity(item, -1) } // 数量 -1
+        )
         binding.recyclerViewInventory.apply {
             // 修复 4: 确保 ID 在 activity_inventory.xml 中正确存在
             layoutManager = LinearLayoutManager(this@InventoryActivity)
@@ -69,7 +70,10 @@ class InventoryActivity : AppCompatActivity() {
         loadUserDataAndInventory(currentUser.uid)
 
         binding.fabAddItem.setOnClickListener {
-            Toast.makeText(this, "Functionality to add item coming soon!", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, AddItemActivity::class.java).apply {
+                putExtra("FAMILY_ID", currentFamilyId) // 传递当前家庭 ID
+            }
+            startActivity(intent)
         }
     }
 
@@ -234,7 +238,51 @@ class InventoryActivity : AppCompatActivity() {
             else -> super.onOptionsItemSelected(item)
         }
     }
+    private fun adjustItemQuantity(item: InventoryItemFirestore, change: Int) {
+        val itemRef = db.collection("inventory").document(item.id)
 
+        db.runTransaction { transaction ->
+            val snapshot = transaction.get(itemRef)
+
+            // 1. 读取当前数量
+            val currentQuantity = snapshot.getLong("quantity")?.toInt() ?: 0
+
+            // 2. 计算新数量
+            val newQuantity = currentQuantity + change
+
+            // 3. 检查数量是否有效
+            if (newQuantity < 0) {
+                // 如果尝试将数量减少到负数，则抛出异常或返回 (事务将被取消)
+                throw Exception("Quantity cannot be negative.")
+            }
+
+            // 4. 更新文档
+            if (newQuantity == 0) {
+                // 数量为 0 时，删除物品
+                transaction.delete(itemRef)
+            } else {
+                // 更新数量
+                transaction.update(itemRef, "quantity", newQuantity)
+            }
+
+            // 返回结果 (可用于 onComplete 监听)
+            null
+        }
+            .addOnSuccessListener {
+                // Firestore 监听器会自动刷新列表，所以这里只需一个Toast确认
+                if (change > 0) {
+                    Toast.makeText(this, "Increased quantity for ${item.name}", Toast.LENGTH_SHORT).show()
+                } else if (change < 0 && item.quantity > 1) {
+                    Toast.makeText(this, "Decreased quantity for ${item.name}", Toast.LENGTH_SHORT).show()
+                } else if (change < 0 && item.quantity == 1) {
+                    Toast.makeText(this, "${item.name} removed from inventory.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("InventoryActivity", "Transaction failed: ", e)
+                Toast.makeText(this, "Failed to adjust quantity: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+    }
     private fun logout() {
         familyListener?.remove()
         inventoryListener?.remove()

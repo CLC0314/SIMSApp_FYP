@@ -1,4 +1,4 @@
-package com.example.familyapp.data
+package com.example.familyapp.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -19,16 +19,13 @@ class InventoryAdapter(
     private val context: Context,
     private var items: MutableList<InventoryListItem>, // 修复：使用 MutableList
     private val onItemClick: (InventoryItemFirestore) -> Unit = {},
-    private val onItemLongClick: (InventoryItemFirestore) -> Unit = {}
+    private val onItemLongClick: (InventoryItemFirestore) -> Unit = {},
+    private val onQuantityAdd: (InventoryItemFirestore) -> Unit,
+    private val onQuantitySubtract: (InventoryItemFirestore) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val VIEW_TYPE_HEADER = 0
     private val VIEW_TYPE_ITEM = 1
-
-    // =========================================================================
-    // 核心修复：更新数据方法 (移动到类级别)
-    // =========================================================================
-
     /**
      * 接收新的列表数据并更新适配器内容。
      * @param newItems 包含 Header 和 Item 的混合列表
@@ -143,6 +140,12 @@ class InventoryAdapter(
                 root.setOnLongClickListener {
                     onItemLongClick(item)
                     true
+                }
+                btnAdd.setOnClickListener {
+                    onQuantityAdd(item)
+                }
+                btnSubtract.setOnClickListener {
+                    onQuantitySubtract(item)
                 }
             }
         }

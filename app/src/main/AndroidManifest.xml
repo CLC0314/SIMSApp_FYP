@@ -26,5 +26,6 @@
 
         <activity android:name=".FamilySelectionActivity" />
 
+        <activity android:name=".AddItemActivity" android:label="Add Inventory Item"/>
     </application>
 </manifest>
