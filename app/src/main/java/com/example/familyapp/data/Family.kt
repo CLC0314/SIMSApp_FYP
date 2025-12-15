@@ -1,4 +1,6 @@
 // data/Family.kt
+package com.example.familyapp.data
+
 data class Family(
     val familyId: String = "",
     val name: String = "",
