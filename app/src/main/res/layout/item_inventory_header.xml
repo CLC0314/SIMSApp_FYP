@@ -1,0 +1,11 @@
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tvHeaderTitle"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="16dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="4dp"
+    android:textSize="14sp"
+    android:textStyle="bold"
+    android:background="#E0E0E0"
+    android:text="类别名称" />

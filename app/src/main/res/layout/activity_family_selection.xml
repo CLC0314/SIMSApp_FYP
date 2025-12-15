@@ -1,0 +1,58 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="32dp"
+    android:gravity="center_horizontal"
+    tools:context=".FamilySelectionActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="家庭共享设置"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="40dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="输入 Family Code 加入现有家庭:"
+        android:layout_marginBottom="8dp"/>
+
+    <EditText
+        android:id="@+id/etFamilyCode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="输入 6 位家庭代码"
+        android:inputType="textCapCharacters"
+        android:maxLength="6"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btnJoinFamily"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="加入家庭"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="32dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="或创建新的家庭:"
+        android:layout_marginBottom="8dp"/>
+
+    <Button
+        android:id="@+id/btnCreateFamily"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="创建新家庭并生成 Family Code"/>
+
+</LinearLayout>
