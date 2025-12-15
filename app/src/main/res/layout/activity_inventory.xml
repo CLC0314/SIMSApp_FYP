@@ -1,95 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    tools:context=".InventoryActivity">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:title="库存管理" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/tvFamilyName"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:paddingBottom="8dp">
+        android:layout_marginTop="32dp"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:text="正在加载家庭..."
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <EditText
-            android:id="@+id/etSearch"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="输入物品名称或类别搜索..."
-            android:imeOptions="actionSearch"
-            android:singleLine="true" />
+    <TextView
+        android:id="@+id/tvMembersTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="32dp"
+        android:textSize="20sp"
+        android:textStyle="italic"
+        android:text="家庭成员列表:"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvFamilyName" />
 
-        <Button
-            android:id="@+id/btnSearch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="搜索"
-            android:layout_marginStart="8dp" />
-
-        <Button
-            android:id="@+id/btnClearSearch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="清除"
-            android:layout_marginStart="4dp" />
-
-    </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
-    <androidx.appcompat.widget.AppCompatImageButton
-        android:id="@+id/fabAddItem"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_gravity="end"
-        android:layout_marginEnd="16dp"
+    <TextView
+        android:id="@+id/tvMemberList"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
         android:layout_marginTop="8dp"
-        android:background="@android:color/holo_blue_dark"
-        android:src="@android:drawable/ic_input_add"
-        android:tint="@android:color/white" />
+        android:textSize="18sp"
+        android:text="成员加载中..."
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvMembersTitle" />
 
-
-    <LinearLayout
-        android:id="@+id/bottom_navigation_bar"
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/btnLogout"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:gravity="center"
-        android:background="#FFFFFF">
+        android:layout_marginHorizontal="24dp"
+        android:text="退出登录"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginBottom="32dp"/>
 
-        <Button
-            android:id="@+id/btnFamily"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="家庭成员"
-            android:background="@android:color/transparent"
-            android:textColor="#808080" />
-
-        <Button
-            android:id="@+id/btnInventory"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="库存管理"
-            android:background="#FFC107"
-            android:textColor="#000000" />
-
-    </LinearLayout>
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

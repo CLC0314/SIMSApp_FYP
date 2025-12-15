@@ -1,6 +1,4 @@
-// com.example.familyapp/FamilyMemberFirestore.kt
-
-package com.example.familyapp
+package com.example.familyapp.data
 
 import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.ServerTimestamp

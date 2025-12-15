@@ -13,7 +13,6 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import java.util.UUID
 
 class FamilySelectionActivity : AppCompatActivity() {
 
@@ -198,7 +197,7 @@ class FamilySelectionActivity : AppCompatActivity() {
     }
 
     private fun navigateToMainActivity() {
-        val intent = Intent(this, MainActivity::class.java).apply {
+        val intent = Intent(this, InventoryActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
         startActivity(intent)

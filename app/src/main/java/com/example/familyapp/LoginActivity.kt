@@ -38,7 +38,7 @@ class LoginActivity : AppCompatActivity() {
 
         // 4. 跳转到注册页
         binding.tvRegister.setOnClickListener {
-            startActivity(Intent(this, RegisterActivity::class.java))
+            startActivity(Intent(this, InventoryActivity::class.java))
         }
     }
 

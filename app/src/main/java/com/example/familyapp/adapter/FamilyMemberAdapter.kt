@@ -5,7 +5,7 @@ package com.example.familyapp.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.familyapp.FamilyMemberFirestore // 🆕 导入新的数据模型
+import com.example.familyapp.data.FamilyMemberFirestore // 🆕 导入新的数据模型
 import com.example.familyapp.databinding.ItemFamilyMemberBinding
 
 class FamilyMemberAdapter(

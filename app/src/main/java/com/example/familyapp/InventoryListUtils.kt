@@ -2,8 +2,6 @@
 
 package com.example.familyapp
 
-import com.example.familyapp.model.InventoryItem
-
 /**
  * 密封类：表示库存列表中的两种项类型：分组头部或实际物品。
  */
