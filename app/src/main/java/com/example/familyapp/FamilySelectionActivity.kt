@@ -4,11 +4,16 @@ package com.example.familyapp
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.familyapp.data.Family // 🆕 确保导入 Family 数据类
 import com.example.familyapp.databinding.ActivityFamilySelectionBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import java.util.UUID
 
 class FamilySelectionActivity : AppCompatActivity() {
@@ -23,7 +28,12 @@ class FamilySelectionActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         auth = FirebaseAuth.getInstance()
-        db = FirebaseFirestore.getInstance()
+        db = Firebase.firestore // 使用 KTX 简化初始化
+
+        // 确保创建家庭所需的输入框可见
+        // 假设您的布局中有这两个输入框
+        // 隐藏加入家庭的代码输入，只在点击加入家庭按钮时显示
+        binding.etFamilyCode.visibility = View.GONE
 
         // 检查用户是否已登录或已加入家庭
         val currentUser = auth.currentUser
@@ -33,15 +43,23 @@ class FamilySelectionActivity : AppCompatActivity() {
             return
         }
 
-        // 🆕 如果用户已经有 familyId，直接跳转到主页 (需在 Firestore 中检查)
         checkIfUserHasFamily(currentUser.uid)
 
         // 绑定按钮事件
         binding.btnCreateFamily.setOnClickListener {
+            // 🆕 调用更新后的函数，处理创建家庭所需的所有输入
             createNewFamily(currentUser.uid)
         }
+
+        // 加入家庭逻辑（保持不变，但增加代码输入框的可见性切换）
         binding.btnJoinFamily.setOnClickListener {
-            joinExistingFamily(currentUser.uid, binding.etFamilyCode.text.toString().trim())
+            if (binding.etFamilyCode.visibility == View.GONE) {
+                binding.etFamilyCode.visibility = View.VISIBLE
+                binding.btnCreateFamily.visibility = View.GONE
+                binding.btnJoinFamily.text = "确认加入"
+            } else {
+                joinExistingFamily(currentUser.uid, binding.etFamilyCode.text.toString().trim())
+            }
         }
     }
 
@@ -61,26 +79,44 @@ class FamilySelectionActivity : AppCompatActivity() {
             }
     }
 
-    // 1. 创建新家庭逻辑
+    // 1. 创建新家庭逻辑 (已修改以处理名称和限制)
     private fun createNewFamily(userId: String) {
-        // 生成一个随机的6位Family Code (例如 A1B2C3)
-        val familyCode = generateFamilyCode()
-        val familyId = UUID.randomUUID().toString() // 生成唯一的 Family ID
+        // 1. 获取输入并验证
+        val familyName = binding.etFamilyName.text.toString().trim()
+        val limitText = binding.etMemberLimit.text.toString().trim()
 
-        val family = hashMapOf(
-            "familyId" to familyId,
-            "code" to familyCode,
-            "ownerId" to userId,
-            "createdAt" to com.google.firebase.Timestamp.now()
+        if (familyName.isEmpty()) {
+            Toast.makeText(this, "家庭名称不能为空", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val memberLimit = limitText.toIntOrNull()
+        if (memberLimit == null || memberLimit < 2) {
+            Toast.makeText(this, "请输入有效的人数限制 (至少2人)", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // 2. 生成 Family Code 和 ID
+        val familyCode = generateFamilyCode()
+        val familyRef = db.collection("families").document() // 让 Firestore 自动生成 ID
+
+        // 3. 使用 Family 数据类创建对象
+        val newFamily = Family(
+            familyId = familyRef.id, // 使用 Firestore 自动生成的 ID
+            name = familyName, // ✅ 存储家庭名称
+            creatorId = userId,
+            members = listOf(userId), // 默认加入创建者
+            memberLimit = memberLimit // ✅ 存储人数限制
         )
 
-        // 批处理操作：1. 创建家庭文档；2. 更新用户文档
+        // 4. 批处理操作：1. 创建家庭文档；2. 更新用户文档
         val batch = db.batch()
-        val familyRef = db.collection("families").document(familyId)
         val userRef = db.collection("users").document(userId)
 
-        batch.set(familyRef, family)
-        batch.update(userRef, "familyId", familyId) // 将用户链接到新家庭
+        // 使用 set(familyRef, newFamily) 存储 Family 数据类
+        batch.set(familyRef, newFamily)
+
+        // 存储 familyCode 在文档中，方便查询和使用
+        batch.update(userRef, "familyId", familyRef.id)
 
         batch.commit()
             .addOnSuccessListener {
@@ -88,11 +124,12 @@ class FamilySelectionActivity : AppCompatActivity() {
                 navigateToMainActivity()
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "创建家庭失败: $e", Toast.LENGTH_LONG).show()
+                Log.e("FamilySelection", "创建家庭失败: ", e)
+                Toast.makeText(this, "创建家庭失败，请重试。", Toast.LENGTH_LONG).show()
             }
     }
 
-    // 2. 加入现有家庭逻辑
+    // 2. 加入现有家庭逻辑 (保持不变)
     private fun joinExistingFamily(userId: String, code: String) {
         if (code.length != 6) {
             Toast.makeText(this, "家庭代码必须是6位", Toast.LENGTH_SHORT).show()
@@ -101,7 +138,7 @@ class FamilySelectionActivity : AppCompatActivity() {
 
         // 查找是否有匹配的 Family Code
         db.collection("families")
-            .whereEqualTo("code", code.uppercase())
+            .whereEqualTo("familyId", code.uppercase()) // 假设 familyId 就是 code
             .limit(1)
             .get()
             .addOnSuccessListener { querySnapshot ->
