@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.familyapp.data.InventoryItemFirestore
@@ -42,7 +43,7 @@ class AddItemActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = "Add New Inventory Item"
 
-        // 检查用户和 familyId
+        // 1. 检查用户登录状态 (必须在检查 familyId 之前)
         val currentUser = auth.currentUser
         if (currentUser == null) {
             startActivity(Intent(this, LoginActivity::class.java))
@@ -50,12 +51,14 @@ class AddItemActivity : AppCompatActivity() {
             return
         }
 
-        // 必须从 Intent 中获取 Family ID
+        // 2. 必须从 Intent 中获取 Family ID (这里是崩溃点)
+        // 💡 确保这个 key 是 "FAMILY_ID"，与 InventoryActivity 中发送的 key 完全一致
         currentFamilyId = intent.getStringExtra("FAMILY_ID")
-        if (currentFamilyId == null) {
-            Toast.makeText(this, "Error: Family ID missing.", Toast.LENGTH_LONG).show()
+
+        if (currentFamilyId.isNullOrEmpty()) {
+            Toast.makeText(this, "Error: Family ID missing. Cannot add item.", Toast.LENGTH_LONG).show()
             finish()
-            return
+            return // 退出 Activity，防止后续代码依赖 currentFamilyId!! 导致崩溃
         }
 
         // 1. 设置单位下拉菜单

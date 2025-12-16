@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">FamilyApp</string>
+    <string name="enable_low_stock_alert">Enable Low Stock Alert</string>
 </resources>

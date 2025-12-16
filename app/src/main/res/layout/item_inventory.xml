@@ -14,83 +14,87 @@
         android:layout_height="wrap_content"
         android:padding="12dp">
 
-        <TextView
-            android:id="@+id/tvItemName"
+        <LinearLayout
+            android:id="@+id/llInfoContainer"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:textStyle="bold"
+            android:orientation="vertical"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/tvQuantity"
-            android:layout_marginEnd="8dp"
-            tools:text="Milk (Whole)" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnSubtract"
+            android:layout_marginEnd="8dp">
 
-        <TextView
-            android:id="@+id/tvExpiredDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="12sp"
-            android:textColor="@color/design_default_color_error"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvItemName"
-            android:layout_marginTop="4dp"
-            android:visibility="gone"
-            tools:text="Expires: 2025-01-01" />
+            <TextView
+                android:id="@+id/tvItemName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                tools:text="Milk (Whole)" />
+
+            <TextView
+                android:id="@+id/tvExpiredDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:textColor="#FF0000"
+                android:visibility="gone"
+                tools:text="Expires: 2025-01-01" />
+
+            <TextView
+                android:id="@+id/tvLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                tools:text="Location: Fridge" />
+
+            <TextView
+                android:id="@+id/tvOwner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                tools:text="Owner: John Doe" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btnSubtract"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_remove"
+            app:tint="@color/black"
+            app:layout_constraintEnd_toStartOf="@+id/tvQuantity"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginEnd="4dp"
+            android:contentDescription="Minus" />
 
         <TextView
             android:id="@+id/tvQuantity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
+            android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="@color/black"
             app:layout_constraintEnd_toStartOf="@+id/btnAdd"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="@+id/tvItemName"
-            android:layout_marginEnd="8dp"
-            tools:text="5 bottles" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginEnd="4dp"
+            tools:text="5 kg" />
 
         <ImageButton
             android:id="@+id/btnAdd"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/ic_input_add"
-            android:contentDescription="Add Quantity"
+            app:tint="#00C853"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageButton
-            android:id="@+id/btnSubtract"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_delete"
-            android:contentDescription="Subtract Quantity"
-            app:layout_constraintEnd_toStartOf="@+id/btnAdd"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginEnd="32dp" />
-
-        <TextView
-            android:id="@+id/tvLocation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textSize="14sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvExpiredDate"
-            tools:text="Location: Fridge" />
-
-        <TextView
-            android:id="@+id/tvOwner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/tvLocation"
-            app:layout_constraintBottom_toBottomOf="@+id/tvLocation"
-            tools:text="Owner: John Doe" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:contentDescription="Plus" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>
