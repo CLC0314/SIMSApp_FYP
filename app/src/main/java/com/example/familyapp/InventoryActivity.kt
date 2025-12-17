@@ -1,6 +1,3 @@
-// com.example.familyapp/InventoryActivity.kt
-// com.example.familyapp/InventoryActivity.kt
-
 package com.example.familyapp
 
 import android.content.Intent
@@ -226,7 +223,26 @@ class InventoryActivity : AppCompatActivity() {
 
         return groupedList
     }
+    private fun adjustItemQuantity(item: InventoryItemFirestore, change: Int) {
+        if (item.id.isEmpty()) return
 
+        val itemRef = db.collection("inventory").document(item.id)
+
+        db.runTransaction { transaction ->
+            val snapshot = transaction.get(itemRef)
+            val currentQuantity = snapshot.getLong("quantity")?.toInt() ?: 0
+            val newQuantity = currentQuantity + change
+
+            if (newQuantity <= 0) {
+                transaction.delete(itemRef) // 数量为0时删除
+            } else {
+                transaction.update(itemRef, "quantity", newQuantity)
+            }
+            null
+        }.addOnFailureListener { e ->
+            Toast.makeText(this, "更新失败: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     // ===============================================
     // 菜单和退出登录

@@ -54,18 +54,18 @@ class InventoryAdapter(
     // ViewHolder 创建 (保持不变)
     // =========================================================================
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val inflater = LayoutInflater.from(parent.context)
-        return when (viewType) {
-            VIEW_TYPE_HEADER -> {
-                val binding = ItemInventoryHeaderBinding.inflate(inflater, parent, false)
-                HeaderViewHolder(binding)
-            }
-            VIEW_TYPE_ITEM -> {
-                val binding = ItemInventoryBinding.inflate(inflater, parent, false)
-                ItemViewHolder(binding)
-            }
-            else -> throw IllegalArgumentException("Unknown view type $viewType")
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when (val item = items[position]) {
+            is InventoryListItem.Header -> (holder as HeaderViewHolder).bind(item)
+            // 2. 将新的回调传递给 bind 函数
+            is InventoryListItem.Item -> (holder as ItemViewHolder).bind(
+                item.item,
+                onItemClick,
+                onItemLongClick,
+                onQuantityAdd,      // 传入加号回调
+                onQuantitySubtract  // 传入减号回调
+            )
+            else -> throw IllegalArgumentException("Unknown item type")
         }
     }
 
@@ -98,9 +98,12 @@ class InventoryAdapter(
             item: InventoryItemFirestore,
             onItemClick: (InventoryItemFirestore) -> Unit,
             onItemLongClick: (InventoryItemFirestore) -> Unit
+            onQuantityAdd: (InventoryItemFirestore) -> Unit,      // 接收参数
+            onQuantitySubtract: (InventoryItemFirestore) -> Unit  // 接收参数
         ) {
             binding.apply {
                 tvItemName.text = item.name
+                tvQuantity.text = item.quantity.toString()
                 // 修复 2: 显示单位，例如 "5 件"
                 tvQuantity.text = "${item.quantity} ${item.unit}"
                 btnAdd.setOnClickListener { onQuantityAdd(item) }
