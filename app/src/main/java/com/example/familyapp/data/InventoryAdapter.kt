@@ -103,7 +103,10 @@ class InventoryAdapter(
                 tvItemName.text = item.name
                 // 修复 2: 显示单位，例如 "5 件"
                 tvQuantity.text = "${item.quantity} ${item.unit}"
+                btnAdd.setOnClickListener { onQuantityAdd(item) }
+                btnSubtract.setOnClickListener { onQuantitySubtract(item) }
 
+                root.setOnClickListener { onItemClick(item) }
                 tvLocation.text = "Location: ${item.location ?: "None"}"
                 tvOwner.text = "Owner: ${item.ownerName ?: "Public"}"
 
