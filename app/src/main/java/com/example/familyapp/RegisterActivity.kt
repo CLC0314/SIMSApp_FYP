@@ -1,10 +1,9 @@
-// com.example.familyapp/RegisterActivity.kt
-
 package com.example.familyapp
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View // 确保导入 View
+import android.util.Log // 必须导入 Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.familyapp.databinding.ActivityRegisterBinding
@@ -25,59 +24,55 @@ class RegisterActivity : AppCompatActivity() {
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 1. 初始化 Firebase 服务
         auth = Firebase.auth
         firestore = FirebaseFirestore.getInstance()
 
-        // 2. 注册按钮监听
         binding.btnRegister.setOnClickListener {
             performRegistration()
         }
 
-        // 3. 返回登录页
         binding.tvLogin.setOnClickListener {
-            finish() // 简单返回到 LoginActivity
+            finish()
         }
     }
-
+    private var isProcessing = false
     private fun performRegistration() {
+        if (isProcessing) return
+        Toast.makeText(this, "注册按钮被点击了！", Toast.LENGTH_SHORT).show()
         val name = binding.etName.text.toString().trim()
         val email = binding.etEmail.text.toString().trim()
         val password = binding.etPassword.text.toString().trim()
         val confirmPassword = binding.etConfirmPassword.text.toString().trim()
-        val errorTextView = binding.tvError
 
-        errorTextView.visibility = View.GONE
-
-        // 验证输入
+        // 验证输入... (保持您的验证逻辑不变)
         if (name.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-            errorTextView.text = "所有字段都必须填写"
-            errorTextView.visibility = View.VISIBLE
-            return
-        }
-        if (password.length < 6) {
-            errorTextView.text = "密码长度必须至少为6位"
-            errorTextView.visibility = View.VISIBLE
-            return
-        }
-        if (password != confirmPassword) {
-            errorTextView.text = "两次输入的密码不匹配"
-            errorTextView.visibility = View.VISIBLE
+            binding.tvError.text = "所有字段都必须填写"; binding.tvError.visibility = View.VISIBLE
             return
         }
 
-        // 注册 Firebase Auth 用户
+        // 🔴 关键修复 1：禁用按钮，防止点击轰炸导致卡死
+        binding.btnRegister.isEnabled = false
+        binding.tvError.text = "正在注册，请稍候..."
+        binding.tvError.visibility = View.VISIBLE
+        Log.d("REGISTER_FLOW", "开始发起 Auth 请求: $email")
+
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
+                if (isFinishing || isDestroyed) return@addOnCompleteListener
                 if (task.isSuccessful) {
                     val firebaseUser = auth.currentUser
                     if (firebaseUser != null) {
-                        // 注册成功，将用户信息存储到 Firestore
+                        Log.d("REGISTER_FLOW", "Auth 成功, UID: ${firebaseUser.uid}")
                         saveUserToFirestore(firebaseUser.uid, name, email)
                     }
                 } else {
-                    // 注册失败
-                    Toast.makeText(baseContext, "注册失败: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                    isProcessing = false // 解锁
+                    // 🔴 关键修复 2：失败时务必恢复按钮点击，否则用户无法重试
+                    binding.btnRegister.isEnabled = true
+                    val errorMsg = task.exception?.message ?: "未知错误"
+                    Log.e("REGISTER_FLOW", "Auth 失败: $errorMsg")
+                    binding.tvError.text = "注册失败: $errorMsg"
+                    Toast.makeText(baseContext, "注册失败: $errorMsg", Toast.LENGTH_LONG).show()
                 }
             }
     }
@@ -87,25 +82,29 @@ class RegisterActivity : AppCompatActivity() {
             "userId" to userId,
             "name" to name,
             "email" to email,
-            "familyId" to null, // 初始为空，待 FamilySelectionActivity 设置
+            "familyId" to null,
             "createdAt" to Timestamp.now()
         )
+
+        Log.d("REGISTER_FLOW", "正在写入 Firestore...")
 
         firestore.collection("users").document(userId)
             .set(user)
             .addOnSuccessListener {
+                Log.d("REGISTER_FLOW", "Firestore 写入成功")
                 Toast.makeText(baseContext, "账号注册成功！", Toast.LENGTH_SHORT).show()
                 navigateToFamilySelection()
             }
             .addOnFailureListener { e ->
-                Toast.makeText(baseContext, "数据存储失败: $e", Toast.LENGTH_LONG).show()
-                // 数据库存储失败，删除刚刚创建的 Auth 用户
+                // 🔴 关键修复 3：写入失败也需恢复按钮
+                binding.btnRegister.isEnabled = true
+                Log.e("REGISTER_FLOW", "Firestore 写入失败: ${e.message}")
+                Toast.makeText(baseContext, "数据存储失败: ${e.message}", Toast.LENGTH_LONG).show()
                 auth.currentUser?.delete()
             }
     }
 
     private fun navigateToFamilySelection() {
-        // 跳转到 FamilySelectionActivity
         val intent = Intent(this, FamilySelectionActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }

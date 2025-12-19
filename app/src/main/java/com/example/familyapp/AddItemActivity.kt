@@ -6,7 +6,6 @@ import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Toast
@@ -14,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.familyapp.data.InventoryItemFirestore
 import com.example.familyapp.databinding.ActivityAddItemBinding
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import java.text.SimpleDateFormat
@@ -33,7 +31,7 @@ class AddItemActivity : AppCompatActivity() {
 
     // 预设单位和分类
     private val unitOptions = listOf("Item", "Pack", "Kg", "Bottle", "Box")
-    private val categoryOptions = mutableListOf("Food", "Accessories", "Cleaning", "Medical")
+    private val categoryOptions = listOf("Food", "Accessories", "Cleaning", "Medical")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,9 +39,8 @@ class AddItemActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.title = "Add New Inventory Item"
+        supportActionBar?.title = "添加新物品"
 
-        // 1. 检查用户登录状态 (必须在检查 familyId 之前)
         val currentUser = auth.currentUser
         if (currentUser == null) {
             startActivity(Intent(this, LoginActivity::class.java))
@@ -51,76 +48,58 @@ class AddItemActivity : AppCompatActivity() {
             return
         }
 
-        // 2. 必须从 Intent 中获取 Family ID (这里是崩溃点)
-        // 💡 确保这个 key 是 "FAMILY_ID"，与 InventoryActivity 中发送的 key 完全一致
+        // 从 Intent 获取 Family ID
         currentFamilyId = intent.getStringExtra("FAMILY_ID")
 
         if (currentFamilyId.isNullOrEmpty()) {
-            Toast.makeText(this, "Error: Family ID missing. Cannot add item.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "错误：缺少家庭 ID，无法添加物品。", Toast.LENGTH_LONG).show()
             finish()
-            return // 退出 Activity，防止后续代码依赖 currentFamilyId!! 导致崩溃
+            return
         }
 
-        // 1. 设置单位下拉菜单
+        setupUI()
+    }
+
+    private fun setupUI() {
+        // 设置单位下拉菜单
         setupDropdown(binding.actvUnit, unitOptions)
-        binding.actvUnit.setText(unitOptions.first(), false) // 默认值
+        binding.actvUnit.setText(unitOptions.first(), false)
 
-        // 2. 设置分类下拉菜单 (TODO: 后续从 Firestore 动态加载)
+        // 设置分类下拉菜单
         setupDropdown(binding.actvCategory, categoryOptions)
-        binding.actvCategory.setText(categoryOptions.first(), false) // 默认值
+        binding.actvCategory.setText(categoryOptions.first(), false)
 
-        // 3. 设置成员选择器 (如果 Private)
+        // 加载家庭成员
         setupMemberSelector()
 
-        // 4. Expiry Date 按钮点击事件
-        binding.btnExpiryDate.setOnClickListener {
-            showDatePicker()
-        }
+        // 日期选择
+        binding.btnExpiryDate.setOnClickListener { showDatePicker() }
 
-        // 5. Belonging Radio Group 切换事件
+        // 归属切换逻辑
         binding.rgBelonging.setOnCheckedChangeListener { _, checkedId ->
-            if (checkedId == R.id.rbPrivate) {
-                binding.tilOwner.visibility = View.VISIBLE
-            } else {
-                binding.tilOwner.visibility = View.GONE
-            }
+            binding.tilOwner.visibility = if (checkedId == R.id.rbPrivate) View.VISIBLE else View.GONE
         }
 
-        // 6. Low Stock Switch 切换事件
+        // 低库存预警切换
         binding.swLowStockAlert.setOnCheckedChangeListener { _, isChecked ->
             binding.tilLowStockValue.visibility = if (isChecked) View.VISIBLE else View.GONE
         }
 
-        // 7. 添加物品按钮
-        binding.btnAddItem.setOnClickListener {
-            saveItemToFirestore()
-        }
+        // 保存按钮
+        binding.btnAddItem.setOnClickListener { saveItemToFirestore() }
     }
 
-    /**
-     * 加载家庭成员列表以供私有物品选择
-     */
     private fun setupMemberSelector() {
-        // 获取成员列表（这里我们简化为只获取当前家庭的成员）
         db.collection("users").whereEqualTo("familyId", currentFamilyId).get()
             .addOnSuccessListener { snapshots ->
                 memberNameMap.clear()
                 val memberNames = mutableListOf<String>()
-
                 for(doc in snapshots) {
-                    val uid = doc.id
-                    val name = doc.getString("name") ?: "Unknown Member"
-                    memberNameMap[name] = uid // Name -> UID 映射
+                    val name = doc.getString("name") ?: "未知成员"
+                    memberNameMap[name] = doc.id
                     memberNames.add(name)
                 }
-
                 setupDropdown(binding.actvOwner, memberNames)
-                if (memberNames.isNotEmpty()) {
-                    binding.actvOwner.setText(memberNames.first(), false) // 默认选择第一个成员
-                }
-            }
-            .addOnFailureListener {
-                Toast.makeText(this, "Failed to load family members.", Toast.LENGTH_SHORT).show()
             }
     }
 
@@ -131,26 +110,15 @@ class AddItemActivity : AppCompatActivity() {
 
     private fun showDatePicker() {
         val calendar = Calendar.getInstance()
-        val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH)
-        val day = calendar.get(Calendar.DAY_OF_MONTH)
-
-        val picker = DatePickerDialog(this, { _, selectedYear, selectedMonth, selectedDay ->
-            val selectedCalendar = Calendar.getInstance().apply {
-                set(selectedYear, selectedMonth, selectedDay)
-            }
+        val picker = DatePickerDialog(this, { _, year, month, day ->
             val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            selectedExpiryDate = sdf.format(selectedCalendar.time)
-
-            binding.tvExpiryDateDisplay.text = "Expiry Date: $selectedExpiryDate"
-        }, year, month, day)
-
+            calendar.set(year, month, day)
+            selectedExpiryDate = sdf.format(calendar.time)
+            binding.tvExpiryDateDisplay.text = "过期日期: $selectedExpiryDate"
+        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
         picker.show()
     }
 
-    /**
-     * 验证输入并写入 Firestore
-     */
     private fun saveItemToFirestore() {
         val name = binding.etItemName.text.toString().trim()
         val quantityStr = binding.etQuantity.text.toString().trim()
@@ -160,32 +128,16 @@ class AddItemActivity : AppCompatActivity() {
         val isPrivate = binding.rbPrivate.isChecked
         val ownerName = binding.actvOwner.text.toString()
 
-        // 1. 基础验证
         if (name.isEmpty() || quantityStr.isEmpty()) {
-            Toast.makeText(this, "Item Name and Quantity are required.", Toast.LENGTH_SHORT).show()
-            return
-        }
-        val quantity = quantityStr.toIntOrNull()
-        if (quantity == null || quantity <= 0) {
-            Toast.makeText(this, "Quantity must be a positive number.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "请填写名称和数量", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // 2. 确定 Owner ID
-        val ownerId: String? = if (isPrivate) {
-            memberNameMap[ownerName]
-        } else {
-            null
-        }
+        val quantity = quantityStr.toIntOrNull() ?: 1
+        val ownerId = if (isPrivate) memberNameMap[ownerName] else null
 
-        if (isPrivate && ownerId == null) {
-            Toast.makeText(this, "Please select a valid member for private item.", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // 3. 构建 Firestore 数据对象
+        // 🆕 这里的 InventoryItemFirestore 不要手动传入 id 字段
         val newItem = InventoryItemFirestore(
-            // Firestore 会自动分配 ID，这里为空
             familyId = currentFamilyId!!,
             name = name,
             category = category,
@@ -194,26 +146,18 @@ class AddItemActivity : AppCompatActivity() {
             expiryDate = selectedExpiryDate,
             ownerId = ownerId,
             ownerName = if (isPrivate) ownerName else null,
-            notes = remarks,
+            notes = remarks
         )
 
-        // TODO: 处理 Low Stock Alert 的存储逻辑 (这需要添加到 InventoryItemFirestore 模型中)
-        val lowStockEnabled = binding.swLowStockAlert.isChecked
-        val lowStockValue = binding.etLowStockValue.text.toString().toIntOrNull()
-
-        // 4. 写入 Firestore
+        // 执行写入
         db.collection("inventory")
-            .add(newItem)
-            .addOnSuccessListener { documentReference ->
-                // 成功后，更新文档 ID (可选，但推荐)
-                documentReference.update("id", documentReference.id)
-
-                // 成功后返回主界面
-                Toast.makeText(this, "Item '${name}' added successfully!", Toast.LENGTH_SHORT).show()
+            .add(newItem) // 🔴 使用 add 自动生成文档 ID，且不手动更新 "id" 字段
+            .addOnSuccessListener {
+                Toast.makeText(this, "item '${name}' added successfully！", Toast.LENGTH_SHORT).show()
                 finish()
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "Error saving item: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "保存失败: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
 

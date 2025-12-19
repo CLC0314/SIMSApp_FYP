@@ -6,5 +6,7 @@ data class Family(
     val name: String = "",
     val creatorId: String = "",
     val members: List<String> = listOf(),
-    val memberLimit: Int = 5
+    val memberLimit: Int = 5,
+    var ownerId: String = "",
+    var createdAt: com.google.firebase.Timestamp? = null
 )
