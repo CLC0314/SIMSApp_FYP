@@ -18,7 +18,7 @@ import com.google.firebase.ktx.Firebase
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-
+import java.util.Date
 class AddItemActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAddItemBinding
@@ -33,6 +33,7 @@ class AddItemActivity : AppCompatActivity() {
     private val unitOptions = listOf("Item", "Pack", "Kg", "Bottle", "Box")
     private val categoryOptions = listOf("Food", "Accessories", "Cleaning", "Medical")
 
+    private var editingItemId: String? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddItemBinding.inflate(layoutInflater)
@@ -56,10 +57,99 @@ class AddItemActivity : AppCompatActivity() {
             finish()
             return
         }
-
+        editingItemId = intent.getStringExtra("ITEM_ID")
+        currentFamilyId = intent.getStringExtra("FAMILY_ID")
         setupUI()
+        currentFamilyId?.let { loadCategories(it) }
+        if (editingItemId != null) {
+            loadItemData(editingItemId!!)
+            binding.btnAddItem.text = "Update Item" // 改变按钮文字
+            supportActionBar?.title = "Edit Item"
+        }
     }
 
+    private fun loadCategories(familyId: String) {
+        // 1. 定义你想要的全维度固定清单
+        val presetCategories = mutableListOf(
+            "Fresh Food", "Pantry", "Frozen", "Beverages", "Snacks", "Spices",
+            "Cleaning", "Laundry", "Paper Goods", "Tools",
+            "Medical", "Supplements", "First Aid",
+            "Toiletries", "Skincare", "Baby Care",
+            "Electronics", "Pets", "Stationery", "Others"
+        )
+
+        // 2. 从 Firestore 获取该家庭特有的自定义分类
+        db.collection("families").document(familyId).get()
+            .addOnSuccessListener { snapshot ->
+                val customCategories = snapshot.get("customCategories") as? List<String> ?: emptyList()
+
+                // 3. 合并、去重、排序
+                val allCategories = (presetCategories + customCategories).distinct().sorted()
+
+                // 4. 更新 UI 适配器
+                val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, allCategories)
+                binding.actvCategory.setAdapter(adapter)
+
+                // 确保点击时弹出
+                binding.actvCategory.setOnClickListener {
+                    binding.actvCategory.showDropDown()
+                }
+            }
+    }
+    private fun setupCategorySpinner() {
+        // 按照你要求的全维度家庭分类清单
+        val categories = arrayOf(
+            // Kitchen (厨房)
+            "Fresh Food", "Pantry", "Frozen", "Beverages", "Snacks", "Spices",
+            // Household (家政)
+            "Cleaning", "Laundry", "Paper Goods", "Tools",
+            // Health (健康)
+            "Medical", "Supplements", "First Aid",
+            // Personal (个人)
+            "Toiletries", "Skincare", "Baby Care",
+            // Others (其他)
+            "Electronics", "Pets", "Stationery", "Others"
+        )
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, categories)
+        binding.actvCategory.setAdapter(adapter)
+
+        // 点击输入框时立即展开下拉列表
+        binding.actvCategory.setOnClickListener {
+            binding.actvCategory.showDropDown()
+        }
+    }
+    private fun loadItemData(itemId: String) {
+        db.collection("inventory").document(itemId).get()
+            .addOnSuccessListener { doc ->
+                val item = doc.toObject(InventoryItemFirestore::class.java)
+                item?.let {
+                    binding.apply {
+                        etItemName.setText(it.name)
+                        etQuantity.setText(it.quantity.toString())
+                        actvUnit.setText(it.unit, false)
+                        actvCategory.setText(it.category, false)
+                        etRemarks.setText(it.notes)
+
+                        // 设置日期显示
+                        if (it.expiryDate != null && it.expiryDate!! > 0) {
+                            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                            selectedExpiryDate = sdf.format(Date(it.expiryDate!!))
+                            tvExpiryDateDisplay.text = "Expiry Date: $selectedExpiryDate"
+                        }
+
+                        // 设置归属 (Owner)
+                        if (it.ownerId != "PUBLIC") {
+                            rbPrivate.isChecked = true
+                            actvOwner.setText(it.ownerName, false)
+                            tilOwner.visibility = View.VISIBLE
+                        } else {
+                            rbPublic.isChecked = true
+                        }
+                    }
+                }
+            }
+    }
     private fun setupUI() {
         // 设置单位下拉菜单
         setupDropdown(binding.actvUnit, unitOptions)
@@ -120,44 +210,88 @@ class AddItemActivity : AppCompatActivity() {
     }
 
     private fun saveItemToFirestore() {
+        // 1. 获取输入并清理空格
         val name = binding.etItemName.text.toString().trim()
         val quantityStr = binding.etQuantity.text.toString().trim()
         val unit = binding.actvUnit.text.toString()
-        val category = binding.actvCategory.text.toString()
+
+        // --- 第3步：分类格式化处理 ---
+        val categoryRaw = binding.actvCategory.text.toString().trim()
+        val category = if (categoryRaw.isNotEmpty()) {
+            // 确保首字母大写，其余小写 (例如 "food" -> "Food")
+            categoryRaw.lowercase().replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+        } else {
+            "Others"
+        }
+        // -------------------------
+
         val remarks = binding.etRemarks.text.toString().trim()
         val isPrivate = binding.rbPrivate.isChecked
-        val ownerName = binding.actvOwner.text.toString()
+        val ownerNameInput = binding.actvOwner.text.toString()
 
+        // 2. 基础验证
         if (name.isEmpty() || quantityStr.isEmpty()) {
-            Toast.makeText(this, "请填写名称和数量", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Please fill in Name and Quantity", Toast.LENGTH_SHORT).show()
             return
         }
 
         val quantity = quantityStr.toIntOrNull() ?: 1
-        val ownerId = if (isPrivate) memberNameMap[ownerName] else null
 
-        // 🆕 这里的 InventoryItemFirestore 不要手动传入 id 字段
+        // 3. 日期转换：确保输出为 Long
+        val expiryTimestamp: Long = selectedExpiryDate?.let { dateStr ->
+            try {
+                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                sdf.parse(dateStr)?.time ?: 0L
+            } catch (e: Exception) {
+                0L
+            }
+        } ?: 0L
+
+        // 4. 归属权逻辑
+        val finalOwnerId: String = if (isPrivate) {
+            memberNameMap[ownerNameInput] ?: auth.currentUser?.uid ?: ""
+        } else {
+            "PUBLIC"
+        }
+
+        val finalOwnerName: String = if (isPrivate) {
+            if (ownerNameInput.isEmpty()) "Private" else ownerNameInput
+        } else {
+            "Public"
+        }
+
+        // 5. 构建实体类对象
         val newItem = InventoryItemFirestore(
-            familyId = currentFamilyId!!,
+            id = editingItemId ?: "",
+            familyId = currentFamilyId ?: "",
             name = name,
-            category = category,
+            category = category, // 使用处理后的分类
             quantity = quantity,
             unit = unit,
-            expiryDate = selectedExpiryDate,
-            ownerId = ownerId,
-            ownerName = if (isPrivate) ownerName else null,
-            notes = remarks
+            expiryDate = expiryTimestamp,
+            ownerId = finalOwnerId,
+            ownerName = finalOwnerName,
+            notes = remarks,
+            location = ""
         )
 
-        // 执行写入
-        db.collection("inventory")
-            .add(newItem) // 🔴 使用 add 自动生成文档 ID，且不手动更新 "id" 字段
+        // 6. 执行写入
+        binding.btnAddItem.isEnabled = false
+        val docRef = if (editingItemId != null) {
+            db.collection("inventory").document(editingItemId!!)
+        } else {
+            db.collection("inventory").document()
+        }
+
+        docRef.set(newItem)
             .addOnSuccessListener {
-                Toast.makeText(this, "item '${name}' added successfully！", Toast.LENGTH_SHORT).show()
+                val msg = if (editingItemId != null) "Item updated!" else "Item added!"
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
                 finish()
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "保存失败: ${e.message}", Toast.LENGTH_LONG).show()
+                binding.btnAddItem.isEnabled = true
+                Toast.makeText(this, "Save failed: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
 

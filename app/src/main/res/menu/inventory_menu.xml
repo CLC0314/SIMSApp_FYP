@@ -7,7 +7,18 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/action_shopping_list"
+        android:icon="@drawable/ic_shopping_cart"
+        android:title="Shopping List"/>
+
+    <item
+        android:id="@+id/action_add_category"
+        android:title="Add Category"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_logout"
         android:title="Logout"
         app:showAsAction="never" />
+
 </menu>

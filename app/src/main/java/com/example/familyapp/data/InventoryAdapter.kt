@@ -11,8 +11,7 @@ import com.example.familyapp.databinding.ItemInventoryBinding
 import com.example.familyapp.databinding.ItemInventoryHeaderBinding
 import com.example.familyapp.data.InventoryItemFirestore
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
 class InventoryAdapter(
     private val context: Context,
@@ -21,22 +20,55 @@ class InventoryAdapter(
     private val onItemLongClick: (InventoryItemFirestore) -> Unit,
     private val onQuantityAdd: (InventoryItemFirestore) -> Unit,
     private val onQuantitySubtract: (InventoryItemFirestore) -> Unit
+    // 🔴 移除了构造函数里的 allItemsFull，改写在类体内
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val VIEW_TYPE_HEADER = 0
     private val VIEW_TYPE_ITEM = 1
 
+    // 🟢 1. 正确的位置：全量数据备份
+    private var allItemsFull: List<InventoryListItem> = mutableListOf()
+
+    // 🟢 2. 正确的位置：更新数据
     fun updateData(newItems: List<InventoryListItem>) {
+        allItemsFull = ArrayList(newItems)
         items.clear()
         items.addAll(newItems)
         notifyDataSetChanged()
     }
+    fun filter(query: String, filterType: String, currentUid: String?) {
+        val lowerCaseQuery = query.lowercase(Locale.getDefault())
 
-    override fun getItemViewType(position: Int): Int {
-        return when (items[position]) {
-            is InventoryListItem.Header -> VIEW_TYPE_HEADER
-            is InventoryListItem.Item -> VIEW_TYPE_ITEM
+        val filteredList = allItemsFull.filter { listItem ->
+            if (listItem is InventoryListItem.Item) {
+                val item = listItem.item
+
+                // 1. 文字匹配
+                val matchesQuery = item.name.lowercase().contains(lowerCaseQuery) ||
+                        item.category.lowercase().contains(lowerCaseQuery)
+
+                // 2. 状态匹配 (新增 Personal 逻辑)
+                val matchesFilter = when (filterType) {
+                    "PERSONAL" -> item.ownerId == currentUid  // 只看号主的
+                    "PUBLIC" -> item.ownerId == "PUBLIC"     // 只看公共的
+                    "EXPIRY" -> (item.expiryDate ?: 0L) > 0  // 只看有日期的
+                    else -> true                             // "ALL"
+                }
+
+                matchesQuery && matchesFilter
+            } else {
+                false // 过滤时不带原有的 Header，稍后重新生成
+            }
         }
+
+        items.clear()
+        items.addAll(filteredList)
+        notifyDataSetChanged()
+    }
+
+    override fun getItemViewType(position: Int): Int = when (items[position]) {
+        is InventoryListItem.Header -> VIEW_TYPE_HEADER
+        is InventoryListItem.Item -> VIEW_TYPE_ITEM
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -87,7 +119,6 @@ class InventoryAdapter(
                 tvLocation.text = "Location: ${item.location ?: "None"}"
                 tvOwner.text = "Owner: ${item.ownerName ?: "Public"}"
 
-                // 按钮事件
                 btnAdd.setOnClickListener { onQuantityAdd(item) }
                 btnSubtract.setOnClickListener { onQuantitySubtract(item) }
                 root.setOnClickListener { onItemClick(item) }
@@ -96,16 +127,17 @@ class InventoryAdapter(
                     true
                 }
 
-                // 过期逻辑
-                if (item.expiryDate != null && item.category.equals("FOOD", ignoreCase = true)) {
+                val expiryTimestamp = item.expiryDate ?: 0L
+                if (expiryTimestamp > 0) {
                     tvExpiredDate.visibility = View.VISIBLE
-                    tvExpiredDate.text = "Expires: ${item.expiryDate}"
-                    val days = calculateDaysRemaining(item.expiryDate!!)
+                    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                    tvExpiredDate.text = "Expires: ${sdf.format(Date(expiryTimestamp))}"
 
+                    val days = calculateDaysRemaining(expiryTimestamp)
                     val backgroundRes = when {
-                        days == null -> R.drawable.bg_list_item_normal
-                        days <= 7 -> R.drawable.bg_list_item_expired // 红色
-                        days <= 30 -> R.drawable.bg_list_item_warning // 黄色
+                        days < 0 -> R.drawable.bg_list_item_expired
+                        days <= 7 -> R.drawable.bg_list_item_expired
+                        days <= 30 -> R.drawable.bg_list_item_warning
                         else -> R.drawable.bg_list_item_normal
                     }
                     root.setBackgroundResource(backgroundRes)
@@ -116,17 +148,10 @@ class InventoryAdapter(
             }
         }
 
-        private fun calculateDaysRemaining(dateStr: String): Long? {
-            return try {
-                val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                val expiryDate = format.parse(dateStr)
-                expiryDate?.let {
-                    val diff = it.time - System.currentTimeMillis()
-                    diff / (24 * 60 * 60 * 1000)
-                }
-            } catch (e: Exception) {
-                null
-            }
+        private fun calculateDaysRemaining(expiryTimestamp: Long): Long {
+            val currentTime = System.currentTimeMillis()
+            val diff = expiryTimestamp - currentTime
+            return diff / (1000 * 60 * 60 * 24)
         }
     }
 }

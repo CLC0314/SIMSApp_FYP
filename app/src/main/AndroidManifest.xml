@@ -12,7 +12,7 @@
         android:theme="@style/Theme.FamilyApp">
 
         <activity android:name=".InventoryActivity" />
-
+        <activity android:name=".ItemDetailActivity" />
         <activity
             android:name=".LoginActivity"
             android:exported="true">
@@ -27,5 +27,9 @@
         <activity android:name=".FamilySelectionActivity" />
 
         <activity android:name=".AddItemActivity" android:label="Add Inventory Item"/>
+
+        <activity
+            android:name=".ShoppingListActivity"
+            android:exported="false" />
     </application>
 </manifest>
