@@ -1,50 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="32dp"
     android:gravity="center"
+    android:background="#F5F7FA"
     tools:context=".LoginActivity">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="家庭库存登录"
-        android:textSize="24sp"
+        android:text="Family Inventory Login"
+        android:textSize="26sp"
         android:textStyle="bold"
+        android:textColor="#212121"
         android:layout_marginBottom="40dp"/>
 
-    <EditText
-        android:id="@+id/etEmail"
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="电子邮件"
-        android:inputType="textEmailAddress"
-        android:layout_marginBottom="16dp"/>
+        android:hint="Email Address"
+        android:textColorHint="#616161"
+        app:hintTextColor="#3F51B5"
+        app:boxBackgroundColor="#FFFFFF"
+        app:boxStrokeColor="#616161"
+        app:startIconDrawable="@android:drawable/ic_dialog_email"
+        app:startIconTint="#616161"
+        android:layout_marginBottom="16dp">
 
-    <EditText
-        android:id="@+id/etPassword"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#212121"
+            android:inputType="textEmailAddress" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="密码"
-        android:inputType="textPassword"
-        android:layout_marginBottom="32dp"/>
+        android:hint="Password"
+        android:textColorHint="#616161"
+        app:hintTextColor="#3F51B5"
+        app:boxBackgroundColor="#FFFFFF"
+        app:boxStrokeColor="#616161"
+        app:startIconDrawable="@android:drawable/ic_lock_idle_lock"
+        app:startIconTint="#616161"
+        app:passwordToggleEnabled="true"
+        android:layout_marginBottom="32dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#212121"
+            android:inputType="textPassword" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <Button
         android:id="@+id/btnLogin"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="登录"/>
+        android:layout_height="56dp"
+        android:text="Login"
+        android:textSize="16sp"
+        android:textAllCaps="false"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/tvRegister"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="还没有账号？点击注册"
-        android:layout_marginTop="20dp"
-        android:textColor="@android:color/holo_blue_dark"
+        android:text="New here? Create an account"
+        android:layout_marginTop="24dp"
+        android:textColor="#1976D2"
+        android:textSize="14sp"
         android:clickable="true"
-        android:focusable="true"/>
+        android:focusable="true"
+        android:padding="8dp"/>
 
 </LinearLayout>

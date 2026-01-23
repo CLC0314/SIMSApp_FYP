@@ -5,21 +5,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#F8F9FA"
     android:fitsSystemWindows="true"
     tools:context=".InventoryActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:titleTextColor="@android:color/white"
-            app:popupTheme="@style/Theme.AppCompat.Light"/>
-
+        android:layout_height="wrap_content"
+        android:background="#3F51B5"
+        app:elevation="4dp"> <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:titleTextColor="@android:color/white"
+        app:subtitleTextColor="#D1D9FF"
+        app:popupTheme="@style/Theme.AppCompat.Light"/>
     </com.google.android.material.appbar.AppBarLayout>
 
     <LinearLayout
@@ -28,37 +28,87 @@
         android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="12dp"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="4dp">
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            app:strokeColor="#BDBDBD"
+            app:strokeWidth="1dp"
+            app:cardBackgroundColor="#FFFFFF">
 
-            <androidx.appcompat.widget.SearchView
-                android:id="@+id/searchView"
+            <LinearLayout
                 android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingEnd="16dp">
+
+                <androidx.appcompat.widget.SearchView
+                    android:id="@+id/searchView"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    app:iconifiedByDefault="false"
+                    app:queryHint="Search items..."
+                    app:searchIcon="@null"
+                    app:queryBackground="@android:color/transparent" />
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="24dp"
+                    android:background="#EEEEEE"
+                    android:layout_marginHorizontal="8dp"/>
+
+                <ImageView
+                    android:id="@+id/btnScan"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:padding="6dp"
+                    android:src="@android:drawable/ic_menu_camera"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    app:tint="#424242" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <HorizontalScrollView
+            android:id="@+id/scrollCategories"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:paddingVertical="4dp"
+            android:clipToPadding="false">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupCategories"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:iconifiedByDefault="false"
-                app:queryHint="Search items..."
-                app:queryBackground="@android:color/transparent" />
-        </androidx.cardview.widget.CardView>
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                app:singleSelection="false"
+                app:chipSpacingHorizontal="8dp">
+            </com.google.android.material.chip.ChipGroup>
+        </HorizontalScrollView>
 
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scrollbars="none"
-            android:paddingBottom="8dp"
+            android:paddingVertical="4dp"
             android:clipToPadding="false">
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/chipGroupFilters"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
                 app:singleSelection="true"
-                app:selectionRequired="true">
+                app:selectionRequired="true"
+                app:chipSpacingHorizontal="8dp">
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipAll"
@@ -66,36 +116,54 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="All"
-                    android:checked="true" />
+                    android:checked="true"
+                    app:chipBackgroundColor="@color/chip_background_selector"
+                    android:textColor="@color/chip_text_selector" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipPersonal"
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="My Items" />
+                    android:text="My Items"
+                    app:chipBackgroundColor="@color/chip_background_selector"
+                    android:textColor="@color/chip_text_selector" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipPublic"
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Public" />
+                    android:text="Public"
+                    app:chipBackgroundColor="@color/chip_background_selector"
+                    android:textColor="@color/chip_text_selector" />
 
                 <com.google.android.material.chip.Chip
-                    android:id="@+id/chipHasExpiry"
+                    android:id="@+id/chipLowStock"
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="With Expiry" />
+                    android:text="Low Stock 📦"
+                    app:chipBackgroundColor="@color/chip_background_selector"
+                    android:textColor="@color/chip_text_selector" />
 
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipPending"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Needs Setup 🆕"
+                    app:chipBackgroundColor="@color/chip_background_selector"
+                    android:textColor="@color/chip_text_selector" />
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewInventory"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="120dp" />
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -103,8 +171,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:contentDescription="Add New Item"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="85dp"
+        app:backgroundTint="#3F51B5"
+        app:tint="@android:color/white"
         app:srcCompat="@android:drawable/ic_input_add" />
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="#FFFFFF"
+        app:itemIconTint="#545454"
+        app:itemTextColor="#545454"
+        app:elevation="16dp"
+        app:menu="@menu/bottom_nav_menu" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

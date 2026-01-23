@@ -1,90 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#F5F5F5"
-    tools:context=".ShoppingListActivity">
+    android:background="#F0F2F5"
+    android:fitsSystemWindows="true">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbarShopping"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/purple_500"
-        app:title="Shopping List"
-        app:titleTextColor="@android:color/white"
-        app:navigationIcon="?attr/homeAsUpIndicator" />
-
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="12dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="4dp">
+        android:background="#3F51B5"
+        app:elevation="4dp"> <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:titleTextColor="@android:color/white"
+        app:subtitleTextColor="#D1D9FF"
+        app:popupTheme="@style/Theme.AppCompat.Light"/>
+    </com.google.android.material.appbar.AppBarLayout>
 
-        <LinearLayout
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="8dp"
-            android:gravity="center_vertical">
+            android:layout_margin="16dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="2dp"
+            app:cardBackgroundColor="#FFFFFF"
+            app:strokeColor="#D1D1D1"
+            app:strokeWidth="1dp">
 
-            <EditText
-                android:id="@+id/etQuickAddName"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="What do you need to buy?"
-                android:background="@android:color/transparent"
-                android:padding="12dp"
-                android:inputType="textCapWords" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:orientation="horizontal"
+                android:paddingEnd="8dp"
+                android:gravity="center_vertical">
 
-            <View
-                android:layout_width="1dp"
-                android:layout_height="24dp"
-                android:background="#DDDDDD"
-                android:layout_marginHorizontal="8dp"/>
+                <EditText
+                    android:id="@+id/etQuickAddName"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:hint="What do you need to buy?"
+                    android:textColor="#212121"
+                    android:textColorHint="#9E9E9E"
+                    android:background="@android:color/transparent"
+                    android:paddingHorizontal="20dp"
+                    android:textSize="15sp"
+                    android:inputType="textCapWords" />
 
-            <ImageButton
-                android:id="@+id/btnAddShoppingItem"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@android:drawable/ic_menu_add"
-                app:tint="@color/purple_500" />
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
+                <View android:layout_width="1dp" android:layout_height="24dp" android:background="#EEEEEE" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvShoppingList"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:paddingHorizontal="12dp"
-        android:clipToPadding="false"
-        tools:listitem="@android:layout/simple_list_item_multiple_choice" />
+                <ImageButton
+                    android:id="@+id/btnScanShopping"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@android:drawable/ic_menu_camera"
+                    app:tint="#3F51B5" />
 
-    <androidx.cardview.widget.CardView
+                <ImageButton
+                    android:id="@+id/btnAddShoppingItem"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@android:drawable/ic_menu_add"
+                    app:tint="#3F51B5" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvShoppingList"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:paddingHorizontal="12dp"
+            android:clipToPadding="false"
+            android:paddingBottom="100dp" />
+    </LinearLayout>
+
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardCompleteAction"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardElevation="8dp"
-        app:cardCornerRadius="0dp">
-
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="56dp"
+        app:cardElevation="12dp"
+        app:cardCornerRadius="0dp"
+        app:cardBackgroundColor="#FFFFFF"
+        app:strokeWidth="0dp">
         <Button
             android:id="@+id/btnCompletePurchase"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="56dp"
             android:layout_margin="16dp"
-            android:text="Complete &amp; Add to Inventory"
+            android:text="Complete &amp; Update Inventory"
             android:textAllCaps="false"
+            android:textStyle="bold"
             android:textSize="16sp"
-            android:backgroundTint="@color/purple_700"
-            app:icon="@android:drawable/ic_input_add"
-            android:insetTop="0dp"
-            android:insetBottom="0dp" />
-    </androidx.cardview.widget.CardView>
+            android:backgroundTint="#3F51B5"
+            app:cornerRadius="8dp" />
+    </com.google.android.material.card.MaterialCardView>
 
-</LinearLayout>
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="#FFFFFF"
+        app:itemIconTint="#545454"
+        app:itemTextColor="#545454"
+        app:elevation="16dp"
+        app:menu="@menu/bottom_nav_menu" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

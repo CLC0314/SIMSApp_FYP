@@ -1,80 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:gravity="center_horizontal"
-    tools:context=".FamilySelectionActivity">
+    android:background="#F0F2F5"
+    android:fillViewport="true">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="选择或创建家庭"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="32dp"/>
-
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="创建新的家庭"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_marginTop="16dp"/>
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center_horizontal"
+        tools:context=".FamilySelectionActivity">
 
-    <EditText
-        android:id="@+id/etFamilyName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="输入家庭名称 (如：幸福之家)"
-        android:inputType="textPersonName"
-        android:minHeight="48dp"
-        android:layout_marginBottom="8dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Family Setup"
+            android:textSize="28sp"
+            android:textColor="#212121"
+            android:textStyle="bold"
+            android:layout_marginBottom="32dp"/>
 
-    <EditText
-        android:id="@+id/etMemberLimit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="设置人数限制 (如：5)"
-        android:inputType="number"
-        android:minHeight="48dp"
-        android:layout_marginBottom="16dp"/>
+        <TextView
+            android:id="@+id/tvCreateHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Create New Family"
+            android:textColor="#212121"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp"/>
 
-    <Button
-        android:id="@+id/btnCreateFamily"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="创建家庭"/>
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Family Name (e.g., Happy Home)"
+            android:textColorHint="#616161"
+            app:hintTextColor="#3F51B5"
+            app:boxBackgroundColor="#FFFFFF"
+            app:boxStrokeColor="#616161"
+            android:layout_marginBottom="12dp">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@android:color/darker_gray"
-        android:layout_marginVertical="32dp"/>
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etFamilyName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#212121"
+                android:inputType="textPersonName" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="或加入现有家庭"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="16dp"/>
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Member Limit (e.g., 5)"
+            android:textColorHint="#616161"
+            app:hintTextColor="#3F51B5"
+            app:boxBackgroundColor="#FFFFFF"
+            app:boxStrokeColor="#616161"
+            android:layout_marginBottom="16dp">
 
-    <EditText
-        android:id="@+id/etFamilyCode"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="输入6位家庭代码"
-        android:inputType="textCapCharacters"
-        android:maxLength="6"
-        android:minHeight="48dp"
-        android:layout_marginBottom="16dp"
-        android:visibility="gone"/> <Button
-    android:id="@+id/btnJoinFamily"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:text="加入家庭"/>
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etMemberLimit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#212121"
+                android:inputType="number" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-</LinearLayout>
+        <Button
+            android:id="@+id/btnCreateFamily"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Create Family"
+            android:textAllCaps="false"
+            android:textSize="16sp" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#BDBDBD"
+            android:layout_marginVertical="32dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Or Join Existing Family"
+            android:textColor="#212121"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilFamilyCode"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter 6-digit Family Code"
+            android:visibility="gone"
+            android:layout_marginBottom="16dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etFamilyCode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#212121"
+                android:inputType="textCapCharacters"
+                android:maxLength="6" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/btnJoinFamily"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Join Family"
+            android:textAllCaps="false"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+</ScrollView>

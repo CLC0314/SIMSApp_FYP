@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:background="#F5F5F5">
+    android:background="#F0F2F5"
+    android:fitsSystemWindows="true">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/white"
+        android:background="#FFFFFF"
+        app:elevation="2dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
@@ -21,26 +23,28 @@
 
             <ImageButton
                 android:id="@+id/btnBack"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="Go back"
-                android:src="@drawable/ic_back" />
+                android:src="@android:drawable/ic_menu_revert"
+                app:tint="#424242" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="12dp"
                 android:text="Item Details"
+                android:textColor="#212121"
                 android:textSize="18sp"
                 android:textStyle="bold" />
         </LinearLayout>
-
     </androidx.appcompat.widget.Toolbar>
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:fillViewport="true"
         app:layout_constraintBottom_toTopOf="@+id/layoutActions"
         app:layout_constraintTop_toBottomOf="@id/toolbar">
 
@@ -48,85 +52,200 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="16dp"
+            android:paddingBottom="100dp">
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardPendingAlert"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:visibility="gone"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="4dp">
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                tools:visibility="visible">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="12dp">
 
-                    <TextView
-                        android:id="@+id/tvDetailName"
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvPendingHint"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="📝 Needs Setup"
+                            android:textStyle="bold" />
+
+                        <Button
+                            android:id="@+id/btnDismissPending"
+                            style="@style/Widget.MaterialComponents.Button.TextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:minHeight="0dp"
+                            android:padding="0dp"
+                            android:text="Dismiss"
+                            android:textAllCaps="false" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeColor="#D1D1D1"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Apple"
-                        android:textSize="24sp"
-                        android:textStyle="bold" />
+                        android:background="#FAFAFA"
+                        android:orientation="vertical"
+                        android:padding="20dp">
 
-                    <TextView
-                        android:id="@+id/tvDetailCategory"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="Category: FOOD"
-                        android:textColor="#757575" />
+                        <TextView
+                            android:id="@+id/tvDetailName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="#212121"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            tools:text="Apple" />
+
+                        <TextView
+                            android:id="@+id/tvDetailCategory"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:letterSpacing="0.05"
+                            android:textColor="#757575"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            tools:text="CATEGORY: FOOD" />
+                    </LinearLayout>
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:layout_marginVertical="16dp"
                         android:background="#EEEEEE" />
 
-                    <include layout="@layout/layout_detail_row" android:id="@+id/rowQuantity" />
-                    <include layout="@layout/layout_detail_row" android:id="@+id/rowLocation" />
-                    <include layout="@layout/layout_detail_row" android:id="@+id/rowOwner" />
-                    <include layout="@layout/layout_detail_row" android:id="@+id/rowExpiry" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingVertical="8dp">
 
+                        <include android:id="@+id/rowQuantity" layout="@layout/layout_detail_row" />
+                        <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginHorizontal="16dp" android:background="#F5F5F5" />
+                        <include android:id="@+id/rowLocation" layout="@layout/layout_detail_row" />
+                        <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginHorizontal="16dp" android:background="#F5F5F5" />
+                        <include android:id="@+id/rowOwner" layout="@layout/layout_detail_row" />
+                        <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginHorizontal="16dp" android:background="#F5F5F5" />
+                        <include android:id="@+id/rowExpiry" layout="@layout/layout_detail_row" />
+                        <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginHorizontal="16dp" android:background="#F5F5F5" />
+                        <include android:id="@+id/rowThreshold" layout="@layout/layout_detail_row" />
+                    </LinearLayout>
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <View android:layout_width="20dp" android:layout_height="2dp" android:background="#D1D1D1" />
+                <TextView
+                    android:id="@+id/tvBatchesTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="12dp"
+                    android:text="Stock Batches"
+                    android:textColor="#424242"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+                <View android:layout_width="0dp" android:layout_height="2dp" android:layout_weight="1" android:background="#D1D1D1" />
+                <Button
+                    android:id="@+id/btnAddBatch"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="+ Add New"
+                    android:textAllCaps="false"
+                    android:textColor="#3F51B5" />
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvBatches"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:nestedScrollingEnabled="false" />
+
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
     <LinearLayout
         android:id="@+id/layoutActions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:background="#FFFFFF"
+        android:elevation="8dp"
         android:orientation="horizontal"
         android:padding="16dp"
-        android:elevation="8dp"
         android:weightSum="3"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnTransfer"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="52dp"
+            android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:text="Transfer"
-            android:layout_marginEnd="4dp" />
+            android:textAllCaps="false"
+            app:backgroundTint="#BDBDBD"
+            app:cornerRadius="8dp" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnEdit"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="52dp"
+            android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:text="Edit"
-            android:layout_marginEnd="4dp" />
+            android:textAllCaps="false"
+            app:backgroundTint="#3F51B5"
+            app:cornerRadius="8dp" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnDelete"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="52dp"
             android:layout_weight="1"
             android:text="Delete"
-            app:backgroundTint="#FF5252" /> </LinearLayout>
+            android:textAllCaps="false"
+            app:backgroundTint="#D32F2F"
+            app:cornerRadius="8dp" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

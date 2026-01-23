@@ -7,14 +7,14 @@ plugins {
 
 android {
     namespace = "com.example.familyapp"
-    compileSdk {
-        version = release(36)
-    }
+    // 🟢 提升编译版本以解决 AAR Metadata 兼容性问题
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.familyapp"
         minSdk = 24
-        targetSdk = 36
+        // 🟢 targetSdk 需与 compileSdk 保持一致
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -43,40 +43,47 @@ android {
     }
 }
 
-// 替换 app/build.gradle.kts 文件中所有的 dependencies {} 块
-
 dependencies {
-    // --- 原始核心和 Compose 依赖 ---
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3)
+    // --- 🟢 统一清理：移除重复的 libs 引用，直接使用稳定版本声明 ---
 
-    // --- 手动定义的 AndroidX 依赖 (使用最新的版本号) ---
+    // Kotlin & Core
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.10.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
-    implementation("androidx.fragment:fragment-ktx:1.6.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
-    // --- 🆕 Firebase 依赖 (已整合) ---
+    // UI & Layout
+    implementation("com.google.android.material:material:1.11.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+
+    // Lifecycle & Coroutines (解决 DuplicateClasses 错误)
+    val lifecycleVersion = "2.7.0"
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
+    implementation("androidx.activity:activity-compose:1.8.2")
+
+    // Compose (保持原有 libs 引用或使用 BOM)
+    implementation(platform("androidx.compose:compose-bom:2024.02.00"))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-graphics")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material3:material3")
+
+    // Firebase
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
 
-    // --- 测试依赖 ---
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
+    // Barcode Scanning (ML Kit)
+    implementation("com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.0")
+
+    // CameraX (解决图片中的依赖兼容性问题)
+    val cameraxVersion = "1.3.1" // 🟢 升级到 1.3.1
+    implementation("androidx.camera:camera-camera2:$cameraxVersion")
+    implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
+    implementation("androidx.camera:camera-view:$cameraxVersion")
+
+    // Test
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 }
